@@ -56,6 +56,7 @@ function App() {
           muted
           controls={false}
           loop
+          playsinline
           onClick={() => {
             setPlaying(true);
           }}
