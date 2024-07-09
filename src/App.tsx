@@ -89,6 +89,7 @@ function App() {
             }}
             style={{
               width: "100%",
+              cursor: playing ? undefined : "pointer",
             }}
           >
             <source src="/video.mp4" type="video/mp4" />
