@@ -14,18 +14,18 @@ function App() {
       setTimeout(() => {
         backgroundVideoRef.current?.play();
         videoRef.current?.play();
-      }, 430);
+      }, 440);
       audio1.play();
 
       const handleAudio1TimeUpdate = () => {
-        const buffer = 0.43;
+        const buffer = 0.44;
         if (audio1.currentTime > audio1.duration - buffer) {
           audio2.play();
         }
       };
 
       const handleAudio2TimeUpdate = () => {
-        const buffer = 0.43;
+        const buffer = 0.44;
         if (audio2.currentTime > audio2.duration - buffer) {
           audio2.currentTime = 0;
           audio2.play();
