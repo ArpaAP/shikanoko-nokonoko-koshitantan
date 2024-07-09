@@ -84,6 +84,7 @@ function App() {
             ref={videoRef}
             muted
             controls={false}
+            playsInline
             loop
             onClick={() => {
               setPlaying(true);
