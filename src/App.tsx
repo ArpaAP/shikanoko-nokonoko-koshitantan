@@ -1,105 +1,100 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 
 function App() {
-  const [playing, setPlaying] = useState(false);
+    const [playing, setPlaying] = useState(false);
+    const [firstAudioPlayed, setFirstAudioPlayed] = useState(false);
+    const [overlayVisible, setOverlayVisible] = useState(true);
 
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const backgroundVideoRef = useRef<HTMLVideoElement>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const backgroundVideoRef = useRef<HTMLVideoElement>(null);
+    const audio1Ref = useRef<HTMLAudioElement | null>(null);
+    const audio2Ref = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(() => {
-    if (playing) {
-      const audio1 = new Audio("/first.mp3");
-      const audio2 = new Audio("/second.mp3");
+    useEffect(() => {
+        if (playing && !firstAudioPlayed) {
+            audio1Ref.current = new Audio('/first.mp3');
+            audio2Ref.current = new Audio('/second.mp3');
 
-      setTimeout(() => {
+            const playSecondAudioAndVideos = () => {
+                backgroundVideoRef.current?.play();
+                videoRef.current?.play();
+                audio2Ref.current?.play();
+            };
+
+            audio1Ref.current.addEventListener('ended', () => {
+                setFirstAudioPlayed(true);
+                setOverlayVisible(false);
+                playSecondAudioAndVideos();
+            });
+
+            audio1Ref.current.play();
+
+            return () => {
+                audio1Ref.current?.removeEventListener('ended', playSecondAudioAndVideos);
+            };
+        } else if (playing && firstAudioPlayed) {
+            playSecondAudioAndVideos();
+        }
+    }, [playing, firstAudioPlayed]);
+
+    const playSecondAudioAndVideos = () => {
         backgroundVideoRef.current?.play();
         videoRef.current?.play();
-      }, 440);
-      audio1.play();
-
-      const handleAudio1TimeUpdate = () => {
-        const buffer = 0.44;
-        if (audio1.currentTime > audio1.duration - buffer) {
-          audio2.play();
+        if (audio2Ref.current) {
+            audio2Ref.current.loop = true;
+            audio2Ref.current.play();
         }
-      };
+    };
 
-      const handleAudio2TimeUpdate = () => {
-        const buffer = 0.44;
-        if (audio2.currentTime > audio2.duration - buffer) {
-          audio2.currentTime = 0;
-          audio2.play();
-        }
-      };
-
-      audio1.addEventListener("timeupdate", handleAudio1TimeUpdate);
-      audio2.addEventListener("timeupdate", handleAudio2TimeUpdate);
-
-      return () => {
-        audio1.pause();
-        audio2.pause();
-        audio1.removeEventListener("timeupdate", handleAudio1TimeUpdate);
-        audio2.removeEventListener("timeupdate", handleAudio2TimeUpdate);
-      };
-    }
-  }, [playing]);
-
-  return (
-    <>
-      <div
-        style={{
-          overflow: "hidden",
-        }}
-      >
-        <video
-          ref={backgroundVideoRef}
-          muted
-          controls={false}
-          loop
-          playsInline
-          onClick={() => {
+    const handleClick = () => {
+        if (!playing) {
             setPlaying(true);
-          }}
-        >
-          <source src="/video.mp4" type="video/mp4" />
-        </video>
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            fontSize: 24,
-            color: "white",
-            backgroundColor: "rgba(0, 0, 0, 0.65)",
-            zIndex: 1,
-            backdropFilter: "blur(14px)",
-          }}
-        >
-          <video
-            ref={videoRef}
-            muted
-            controls={false}
-            playsInline
-            loop
-            onClick={() => {
-              setPlaying(true);
-            }}
-            style={{
-              width: "100%",
-              cursor: playing ? undefined : "pointer",
-            }}
-          >
-            <source src="/video.mp4" type="video/mp4" />
-          </video>
-        </div>
-      </div>
-    </>
-  );
+        }
+    };
+
+    return (
+        <>
+            <div style={{ overflow: 'hidden' }}>
+                <video ref={backgroundVideoRef} muted controls={false} loop playsInline onClick={handleClick}>
+                    <source src="/video.mp4" type="video/mp4" />
+                </video>
+                <video
+                    ref={videoRef}
+                    muted
+                    controls={false}
+                    playsInline
+                    loop
+                    onClick={handleClick}
+                    style={{
+                        width: '100%',
+                        cursor: playing ? undefined : 'pointer',
+                    }}
+                >
+                    <source src="/video.mp4" type="video/mp4" />
+                </video>
+                {overlayVisible && (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            fontSize: 24,
+                            color: 'white',
+                            backgroundColor: 'rgba(0, 0, 0, 0.65)',
+                            zIndex: 1,
+                            backdropFilter: 'blur(14px)',
+                        }}
+                        onClick={handleClick}
+                    ></div>
+                )}
+            </div>
+        </>
+    );
 }
 
 export default App;
